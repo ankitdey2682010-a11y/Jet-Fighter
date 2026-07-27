@@ -1,0 +1,193 @@
+/* Reset & Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  background: #e2e8f0;
+  color: #1e293b;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Main Container */
+#game-app {
+  position: relative;
+  width: 1024px;
+  height: 600px;
+  border-radius: 12px;
+  border: 2px solid #cbd5e1;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+canvas {
+  display: block;
+  background: #f8fafc;
+}
+
+/* Overlay Screen Panels */
+.overlay-panel {
+  position: absolute;
+  inset: 0;
+  background: rgba(248, 250, 252, 0.95);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  z-index: 10;
+  transition: opacity 0.2s ease;
+}
+
+/* Typography */
+.title-primary {
+  font-size: 3rem;
+  letter-spacing: -0.5px;
+  color: #0284c7;
+  margin-bottom: 4px;
+}
+
+.title-secondary {
+  font-size: 1.1rem;
+  color: #ea580c;
+  letter-spacing: 4px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+h2 {
+  font-size: 1.8rem;
+  color: #0f172a;
+  margin-bottom: 16px;
+}
+
+.description {
+  font-size: 1rem;
+  color: #475569;
+  line-height: 1.6;
+  max-width: 520px;
+  margin-bottom: 24px;
+}
+
+/* Controls Card */
+.card-controls {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 18px 24px;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.row-control {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.row-control:last-child {
+  border-bottom: none;
+}
+
+.key-binding {
+  font-weight: 700;
+  color: #0284c7;
+  background: #f0f9ff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.key-desc {
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.tip-text {
+  font-size: 0.88rem;
+  color: #64748b;
+  margin-bottom: 24px;
+  max-width: 500px;
+}
+
+/* Sector Selection Grid */
+.sector-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+  width: 100%;
+  max-width: 440px;
+}
+
+.sector-option {
+  padding: 12px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #334155;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sector-option:hover {
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
+.sector-option.active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
+/* Buttons */
+.action-btn {
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+  background: #0284c7;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+  transition: transform 0.12s ease, background-color 0.12s ease;
+}
+
+.action-btn:hover {
+  background: #0369a1;
+  transform: translateY(-1px);
+}
+
+.launch-btn {
+  background: #ea580c;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+}
+
+.launch-btn:hover {
+  background: #c2410c;
+}
+
+/* Helper Utilities */
+.hidden {
+  display: none !important;
+}
