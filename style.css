@@ -1,3 +1,4 @@
+/* Reset & Base Styles */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,7 +7,7 @@
 }
 
 body {
-  background: #0f172a;
+  background: #e2e8f0;
   color: #1e293b;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   display: flex;
@@ -16,13 +17,14 @@ body {
   overflow: hidden;
 }
 
+/* Main Container */
 #game-app {
   position: relative;
   width: 1024px;
   height: 600px;
   border-radius: 12px;
-  border: 3px solid #0284c7;
-  box-shadow: 0 0 30px rgba(2, 132, 199, 0.3);
+  border: 2px solid #cbd5e1;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   background: #f8fafc;
 }
@@ -32,11 +34,12 @@ canvas {
   background: #f8fafc;
 }
 
+/* Overlay Screen Panels */
 .overlay-panel {
   position: absolute;
   inset: 0;
-  background: rgba(248, 250, 252, 0.96);
-  backdrop-filter: blur(8px);
+  background: rgba(248, 250, 252, 0.95);
+  backdrop-filter: blur(6px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -47,19 +50,19 @@ canvas {
   transition: opacity 0.2s ease;
 }
 
+/* Typography */
 .title-primary {
-  font-size: 3.2rem;
+  font-size: 3rem;
   letter-spacing: -0.5px;
   color: #0284c7;
   margin-bottom: 4px;
-  text-shadow: 0 2px 10px rgba(2, 132, 199, 0.2);
 }
 
 .title-secondary {
   font-size: 1.1rem;
   color: #ea580c;
   letter-spacing: 4px;
-  font-weight: 800;
+  font-weight: 700;
   margin-bottom: 18px;
 }
 
@@ -77,15 +80,16 @@ h2 {
   margin-bottom: 24px;
 }
 
+/* Controls Card */
 .card-controls {
   background: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
   padding: 18px 24px;
   margin-bottom: 16px;
   width: 100%;
   max-width: 520px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
 .row-control {
@@ -103,7 +107,7 @@ h2 {
 .key-binding {
   font-weight: 700;
   color: #0284c7;
-  background: #e0f2fe;
+  background: #f0f9ff;
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -121,6 +125,7 @@ h2 {
   max-width: 500px;
 }
 
+/* Sector Selection Grid */
 .sector-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -153,6 +158,7 @@ h2 {
   border-color: #0284c7;
 }
 
+/* Buttons */
 .action-btn {
   padding: 12px 30px;
   font-size: 1rem;
@@ -163,24 +169,25 @@ h2 {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
   transition: transform 0.12s ease, background-color 0.12s ease;
 }
 
 .action-btn:hover {
   background: #0369a1;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .launch-btn {
   background: #ea580c;
-  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
 }
 
 .launch-btn:hover {
   background: #c2410c;
 }
 
+/* Helper Utilities */
 .hidden {
   display: none !important;
 }
