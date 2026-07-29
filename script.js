@@ -226,114 +226,27 @@ class PlayerShip {
     }
   }
   draw() {
-    ctx.save();
-    ctx.translate(this.x, this.y);
-
-    // 1. DYNAMIC THRUSTER ENGINE TRAIL (Animated particles + flame glow)
-    const flameLength = this.isDashing ? 28 : 16;
-    const flameFlicker = Math.random() * 6;
-    
-    // Outer Engine Flame (Plasma Blue / Orange)
-    const flameGrad = ctx.createLinearGradient(-flameLength - flameFlicker, 0, 0, 0);
-    flameGrad.addColorStop(0, 'rgba(56, 189, 248, 0)');
-    flameGrad.addColorStop(0.5, this.isDashing ? '#00f0ff' : '#f97316');
-    flameGrad.addColorStop(1, '#ffffff');
-
-    ctx.fillStyle = flameGrad;
+    ctx.fillStyle = this.isDashing ? '#0284c7' : '#38bdf8';
     ctx.beginPath();
-    ctx.moveTo(-flameLength - flameFlicker, this.height / 2);
-    ctx.lineTo(0, this.height / 2 - 7);
-    ctx.lineTo(4, this.height / 2);
-    ctx.lineTo(0, this.height / 2 + 7);
-    ctx.closePath();
+    ctx.moveTo(this.x, this.y + 8);
+    ctx.lineTo(this.x - (14 + Math.random() * 6), this.y + this.height / 2);
+    ctx.lineTo(this.x, this.y + this.height - 8);
     ctx.fill();
 
-    // 2. MAIN SHIP HULL (Sleek Aerodynamic Firefighter Starfighter)
-    // Main Body Gradient
-    const hullGrad = ctx.createLinearGradient(0, 0, this.width, 0);
-    hullGrad.addColorStop(0, '#0284c7');  // Deep Cyan/Blue
-    hullGrad.addColorStop(0.6, '#38bdf8'); // Bright Sky Blue
-    hullGrad.addColorStop(1, '#e0f2fe');   // Metallic Tip
-
-    ctx.fillStyle = hullGrad;
-    ctx.beginPath();
-    ctx.moveTo(0, 10);
-    ctx.lineTo(14, 2);
-    ctx.lineTo(this.width - 12, 10);
-    ctx.lineTo(this.width, this.height / 2); // Sharp Nose
-    ctx.lineTo(this.width - 12, this.height - 10);
-    ctx.lineTo(14, this.height - 2);
-    ctx.lineTo(0, this.height - 10);
-    ctx.closePath();
-    ctx.fill();
-
-    // Hull Outline/Border Accent
-    ctx.strokeStyle = '#0284c7';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // 3. WINGS & SIDE BOOSTER FINS
-    ctx.fillStyle = '#0369a1';
-    // Top Wing
-    ctx.beginPath();
-    ctx.moveTo(8, 6);
-    ctx.lineTo(24, -4);
-    ctx.lineTo(30, 6);
-    ctx.closePath();
-    ctx.fill();
-    // Bottom Wing
-    ctx.beginPath();
-    ctx.moveTo(8, this.height - 6);
-    ctx.lineTo(24, this.height + 4);
-    ctx.lineTo(30, this.height - 6);
-    ctx.closePath();
-    ctx.fill();
-
-    // 4. EMERGENCY FIREFIGHTER STRIPES (Yellow Hazard Accents)
-    ctx.fillStyle = '#f59e0b';
-    ctx.beginPath();
-    ctx.moveTo(16, 8);
-    ctx.lineTo(20, 8);
-    ctx.lineTo(14, this.height - 8);
-    ctx.lineTo(10, this.height - 8);
-    ctx.closePath();
-    ctx.fill();
-
-    // 5. GLOWING COCKPIT VISOR
-    const visorGrad = ctx.createLinearGradient(this.width - 24, 0, this.width - 10, 0);
-    visorGrad.addColorStop(0, '#38bdf8');
-    visorGrad.addColorStop(0.5, '#e0f2fe');
-    visorGrad.addColorStop(1, '#ffffff');
-
-    ctx.fillStyle = visorGrad;
-    ctx.beginPath();
-    ctx.ellipse(this.width - 18, this.height / 2, 10, 5, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Visor Glass Glow Ring
-    ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // 6. WATER CANNON MUZZLE NOZZLE (Front-mounted Hose)
-    ctx.fillStyle = '#64748b';
-    ctx.fillRect(this.width - 4, this.height / 2 - 2, 6, 4);
-    ctx.fillStyle = '#38bdf8';
-    ctx.fillRect(this.width + 1, this.height / 2 - 1, 3, 2);
-
-    // 7. FORCEFIELD SHIELD EFFECT (If Shield Powerup Active)
-    if (this.hasShield) {
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.85)';
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = '#00f0ff';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.arc(this.width / 2, this.height / 2, this.width / 1.15, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.shadowBlur = 0; // Reset Shadow
+    if (playerImgLoaded) {
+      ctx.drawImage(playerImg, this.x, this.y, this.width, this.height);
+    } else {
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
-    ctx.restore();
+    if (this.hasShield) {
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(this.x + this.width / 2, this.y + this.height / 2, this.width / 1.1, 0, Math.PI * 2);
+      ctx.stroke();
+    }
   }
 }
 const player = new PlayerShip();
@@ -413,144 +326,22 @@ class EnemyAutomata {
     if (this.x < -this.width) this.isExpired = true;
   }
   draw() {
-    ctx.save();
-    ctx.translate(this.x, this.y);
+    if (this.type === 'boss') ctx.fillStyle = '#dc2626';
+    else if (this.type === 'heavy') ctx.fillStyle = '#ea580c';
+    else ctx.fillStyle = '#f97316';
+
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.fillRect(this.x + 4, this.y + 6, 8, 6);
+    if (this.height > 30) ctx.fillRect(this.x + 4, this.y + this.height - 12, 8, 6);
 
     if (this.type === 'boss') {
-      // ----------------------------------------------------
-      // 1. DREADNOUGHT BOSS AUTOMATA (Massive Mechanical Warship)
-      // ----------------------------------------------------
-      
-      // Main Hull Gradient (Dark Crimson to Fiery Red)
-      const bossGrad = ctx.createLinearGradient(0, 0, this.width, 0);
-      bossGrad.addColorStop(0, '#7f1d1d');
-      bossGrad.addColorStop(0.5, '#dc2626');
-      bossGrad.addColorStop(1, '#991b1b');
-
-      ctx.fillStyle = bossGrad;
-      ctx.beginPath();
-      ctx.moveTo(this.width, this.height / 2); // Nose
-      ctx.lineTo(this.width - 25, 10);
-      ctx.lineTo(30, 0);
-      ctx.lineTo(0, 20);
-      ctx.lineTo(15, this.height / 2);
-      ctx.lineTo(0, this.height - 20);
-      ctx.lineTo(30, this.height);
-      ctx.lineTo(this.width - 25, this.height - 10);
-      ctx.closePath();
-      ctx.fill();
-
-      // Armor Outline
-      ctx.strokeStyle = '#f87171';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Glowing Core Reactor Eyeball
-      ctx.fillStyle = '#fef08a';
-      ctx.beginPath();
-      ctx.arc(this.width - 35, this.height / 2, 14, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#dc2626';
-      ctx.beginPath();
-      ctx.arc(this.width - 35, this.height / 2, 7, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Flame Cannons (Top & Bottom)
-      ctx.fillStyle = '#450a0a';
-      ctx.fillRect(this.width - 15, 20, 18, 8);
-      ctx.fillRect(this.width - 15, this.height - 28, 18, 8);
-
-      // Boss Health Bar Header Overlay
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
-      ctx.fillRect(0, -18, this.width, 8);
-      ctx.fillStyle = '#ef4444';
-      ctx.fillRect(0, -18, (this.hp / this.maxHp) * this.width, 8);
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(0, -18, this.width, 8);
-
-    } else if (this.type === 'heavy') {
-      // ----------------------------------------------------
-      // 2. HEAVY CRUISER (Armored Quad-Wing Mech)
-      // ----------------------------------------------------
-      
-      // Rear Thruster Flame
-      ctx.fillStyle = '#f97316';
-      ctx.fillRect(this.width, this.height / 2 - 6, 10 + Math.random() * 6, 12);
-
-      // Body Hull
-      ctx.fillStyle = '#9a3412';
-      ctx.beginPath();
-      ctx.moveTo(0, this.height / 2);
-      ctx.lineTo(20, 4);
-      ctx.lineTo(this.width - 10, 12);
-      ctx.lineTo(this.width, this.height / 2);
-      ctx.lineTo(this.width - 10, this.height - 12);
-      ctx.lineTo(20, this.height - 4);
-      ctx.closePath();
-      ctx.fill();
-
-      // Armor Plates
-      ctx.fillStyle = '#ea580c';
-      ctx.fillRect(10, 14, this.width - 24, this.height - 28);
-
-      // Dual Visor Eyes
-      ctx.fillStyle = '#fde047';
-      ctx.fillRect(10, 10, 10, 5);
-      ctx.fillRect(10, this.height - 15, 10, 5);
-
-    } else if (this.type === 'interceptor') {
-      // ----------------------------------------------------
-      // 3. INTERCEPTOR (Agile Swept-Wing Fighter)
-      // ----------------------------------------------------
-      
-      // Engine Flame
-      ctx.fillStyle = '#ef4444';
-      ctx.beginPath();
-      ctx.moveTo(this.width, this.height / 2);
-      ctx.lineTo(this.width + 10 + Math.random() * 4, this.height / 2 - 4);
-      ctx.lineTo(this.width + 10 + Math.random() * 4, this.height / 2 + 4);
-      ctx.closePath();
-      ctx.fill();
-
-      // Sharp Needle Body
-      ctx.fillStyle = '#c2410c';
-      ctx.beginPath();
-      ctx.moveTo(0, this.height / 2); // Sharp Nose Pointing Left
-      ctx.lineTo(this.width - 8, 2);
-      ctx.lineTo(this.width, 8);
-      ctx.lineTo(this.width - 12, this.height / 2);
-      ctx.lineTo(this.width, this.height - 8);
-      ctx.lineTo(this.width - 8, this.height - 2);
-      ctx.closePath();
-      ctx.fill();
-
-      // Cockpit Light
-      ctx.fillStyle = '#fef08a';
-      ctx.fillRect(8, this.height / 2 - 3, 12, 6);
-
-    } else {
-      // ----------------------------------------------------
-      // 4. SCOUT BOT (Fast Light Strike Drone)
-      // ----------------------------------------------------
-      
-      // Body
-      ctx.fillStyle = '#f97316';
-      ctx.beginPath();
-      ctx.moveTo(0, this.height / 2);
-      ctx.lineTo(this.width, 4);
-      ctx.lineTo(this.width - 8, this.height / 2);
-      ctx.lineTo(this.width, this.height - 4);
-      ctx.closePath();
-      ctx.fill();
-
-      // Visor Eye
-      ctx.fillStyle = '#fef08a';
-      ctx.fillRect(6, this.height / 2 - 2, 8, 4);
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillRect(this.x, this.y - 14, this.width, 8);
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(this.x, this.y - 14, (this.hp / this.maxHp) * this.width, 8);
     }
-
-    ctx.restore();
   }
 }
 
@@ -856,8 +647,7 @@ function renderFrame() {
   ctx.textAlign = 'left';
 }
 
-function gameLoop()
-{
+function gameLoop() {
   updateFrame();
   renderFrame();
   if (isLoopRunning) requestAnimationFrame(gameLoop);
