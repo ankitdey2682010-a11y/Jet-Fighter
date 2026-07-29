@@ -1,40 +1,47 @@
+/* ==========================================================================
+   ASTRO FIREFIGHTER - VERSION 2.0 (PRO EDITION)
+   - High Score Storage, Screen Shake FX, Combo Multiplier System
+   - Object-oriented sprite rendering & WebAudio engine
+   ========================================================================== */
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// --- PLAYER SPRITE ---
 const playerImg = new Image();
-playerImg.src = 'ship.png';
+playerImg.src = 'ship.png'; // Will default to SVG vector if ship.png isn't found
 let playerImgLoaded = false;
 playerImg.onload = () => { playerImgLoaded = true; };
 
+// Fallback graphic generator if local file is absent
 const fallbackSvg = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60"><path d="M5 20 L25 5 L60 12 L90 25 L100 30 L90 35 L60 48 L25 55 L5 40 L15 30 Z" fill="%230284c7" stroke="%2338bdf8" stroke-width="2"/><rect x="55" y="20" width="22" height="12" rx="4" fill="%23e0f2fe"/><rect x="25" y="38" width="30" height="6" fill="%23f59e0b"/><polygon points="0,22 15,30 0,38" fill="%23f97316"/></svg>';
 if (!playerImg.src) playerImg.src = fallbackSvg;
 
+// Screen Overlays
 const screenWelcome = document.getElementById('screen-welcome');
 const screenControls = document.getElementById('screen-controls');
 const screenLevels = document.getElementById('screen-levels');
 const screenDebrief = document.getElementById('screen-debrief');
 
+// Interactive Buttons
 const btnNextControls = document.getElementById('btn-next-controls');
 const btnNextLevels = document.getElementById('btn-next-levels');
 const btnLaunchGame = document.getElementById('btn-launch-game');
 const btnReturnMenu = document.getElementById('btn-return-menu');
 const sectorGrid = document.getElementById('sector-grid');
 
+// Debrief Elements
 const debriefTitle = document.getElementById('debrief-title');
 const debriefSubtitle = document.getElementById('debrief-subtitle');
 const debriefDetails = document.getElementById('debrief-details');
 
 // --- AUDIO SYNTHESIZER ---
-class AudioSynthesize
- {
+class AudioSynthesizer {
   constructor() { this.audioCtx = null; }
-  ensureContext() 
-  {
+  ensureContext() {
     if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-  playWaterShot()
-   {
+  playWaterShot() {
     if (!this.audioCtx) return;
     const osc = this.audioCtx.createOscillator();
     const gain = this.audioCtx.createGain();
@@ -46,8 +53,7 @@ class AudioSynthesize
     osc.connect(gain); gain.connect(this.audioCtx.destination);
     osc.start(); osc.stop(this.audioCtx.currentTime + 0.09);
   }
-  playExplosion()
-   {
+  playExplosion() {
     if (!this.audioCtx) return;
     const duration = 0.22;
     const buffer = this.audioCtx.createBuffer(1, this.audioCtx.sampleRate * duration, this.audioCtx.sampleRate);
@@ -80,15 +86,13 @@ class AudioSynthesize
 }
 const sfx = new AudioSynthesizer();
 
+// --- MENU & SECTOR NAVIGATION ---
 const MAX_SECTORS = 15;
 let chosenStartSector = 1;
 
-function renderSectorGrid(
-
-) {
+function renderSectorGrid() {
   sectorGrid.innerHTML = '';
-  for (let s = 1; s <= MAX_SECTORS; s++) 
-    {
+  for (let s = 1; s <= MAX_SECTORS; s++) {
     const btn = document.createElement('button');
     btn.className = `sector-option ${s === chosenStartSector ? 'active' : ''}`;
     btn.innerText = s;
@@ -102,27 +106,23 @@ function renderSectorGrid(
 }
 renderSectorGrid();
 
-btnNextControls.addEventListener('click', () => 
-  {
+btnNextControls.addEventListener('click', () => {
   sfx.ensureContext();
   screenWelcome.classList.add('hidden');
   screenControls.classList.remove('hidden');
 });
 
-btnNextLevels.addEventListener('click', () => 
-  {
+btnNextLevels.addEventListener('click', () => {
   screenControls.classList.add('hidden');
   screenLevels.classList.remove('hidden');
 });
 
-btnLaunchGame.addEventListener('click', () => 
-  {
+btnLaunchGame.addEventListener('click', () => {
   screenLevels.classList.add('hidden');
   launchMission(chosenStartSector);
 });
 
-btnReturnMenu.addEventListener('click', () => 
-  {
+btnReturnMenu.addEventListener('click', () => {
   screenDebrief.classList.add('hidden');
   screenWelcome.classList.remove('hidden');
 });
@@ -137,27 +137,20 @@ let screenShakeTimer = 0;
 let isLoopRunning = false;
 const activeKeys = {};
 
-window.addEventListener('keydown', (e) =>
-   {
+window.addEventListener('keydown', (e) => {
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   activeKeys[e.code] = true;
 });
-window.addEventListener('keyup', (e) =>
-   { activeKeys[e.code] = false; });
+window.addEventListener('keyup', (e) => { activeKeys[e.code] = false; });
 
-function addScreenShake(intensity = 10)
- {
+function addScreenShake(intensity = 10) {
   screenShakeTimer = intensity;
 }
 
 // --- PLAYER ---
-class PlayerShip
-{
-  constructor() { this.reset();
-
-   }
-  reset() 
-  {
+class PlayerShip {
+  constructor() { this.reset(); }
+  reset() {
     this.x = 80;
     this.y = canvas.height / 2 - 14;
     this.width = 54;
@@ -175,21 +168,16 @@ class PlayerShip
     this.hasShield = false;
     this.lastShotTime = 0;
   }
-  update()
-   {
+  update() {
     let currentSpeed = this.speed;
 
     if (this.dashCooldown > 0) this.dashCooldown--;
-    if (this.isDashing) 
-      {
+    if (this.isDashing) {
       currentSpeed *= 2.2;
       this.dashTimer--;
       if (this.dashTimer <= 0) this.isDashing = false;
-    }
-     else if (activeKeys['ShiftLeft'] || activeKeys['ShiftRight']) 
-      {
-      if (this.dashCooldown <= 0) 
-        {
+    } else if (activeKeys['ShiftLeft'] || activeKeys['ShiftRight']) {
+      if (this.dashCooldown <= 0) {
         this.isDashing = true;
         this.dashTimer = 10;
         this.dashCooldown = 75;
@@ -202,21 +190,16 @@ class PlayerShip
     if ((activeKeys['KeyA'] || activeKeys['ArrowLeft']) && this.x > 10) this.x -= currentSpeed;
     if ((activeKeys['KeyD'] || activeKeys['ArrowRight']) && this.x < canvas.width / 1.8) this.x += currentSpeed;
 
-    if (this.isOverheated) 
-      {
+    if (this.isOverheated) {
       this.cannonTemp -= 0.75;
-      if (this.cannonTemp <= 0) 
-        { this.cannonTemp = 0; this.isOverheated = false; }
-    } 
-    else if (this.cannonTemp > 0) 
-      {
+      if (this.cannonTemp <= 0) { this.cannonTemp = 0; this.isOverheated = false; }
+    } else if (this.cannonTemp > 0) {
       this.cannonTemp -= 0.4;
     }
 
     if (activeKeys['Space'] && !this.isOverheated) this.shoot();
   }
-  shoot()
-   {
+  shoot() {
     const now = Date.now();
     if (now - this.lastShotTime < 110) return;
     this.lastShotTime = now;
@@ -231,28 +214,26 @@ class PlayerShip
     const noseX = this.x + this.width;
     const centerY = this.y + this.height / 2;
 
-    if (this.weaponTier === 1) 
-      {
+    if (this.weaponTier === 1) {
       waterShots.push(new WaterShot(noseX, centerY, 0));
-    } 
-    else if (this.weaponTier === 2) 
-      {
+    } else if (this.weaponTier === 2) {
       waterShots.push(new WaterShot(noseX, this.y + 4, 0));
       waterShots.push(new WaterShot(noseX, this.y + this.height - 4, 0));
-    }
-     else
-       {
+    } else {
       waterShots.push(new WaterShot(noseX, centerY, 0));
       waterShots.push(new WaterShot(noseX, this.y + 4, -1.5));
       waterShots.push(new WaterShot(noseX, this.y + this.height - 4, 1.5));
     }
   }
-  draw() 
-  {
+  draw() {
     ctx.save();
     ctx.translate(this.x, this.y);
+
+    // 1. DYNAMIC THRUSTER ENGINE TRAIL (Animated particles + flame glow)
     const flameLength = this.isDashing ? 28 : 16;
     const flameFlicker = Math.random() * 6;
+    
+    // Outer Engine Flame (Plasma Blue / Orange)
     const flameGrad = ctx.createLinearGradient(-flameLength - flameFlicker, 0, 0, 0);
     flameGrad.addColorStop(0, 'rgba(56, 189, 248, 0)');
     flameGrad.addColorStop(0.5, this.isDashing ? '#00f0ff' : '#f97316');
@@ -267,6 +248,8 @@ class PlayerShip
     ctx.closePath();
     ctx.fill();
 
+    // 2. MAIN SHIP HULL (Sleek Aerodynamic Firefighter Starfighter)
+    // Main Body Gradient
     const hullGrad = ctx.createLinearGradient(0, 0, this.width, 0);
     hullGrad.addColorStop(0, '#0284c7');  // Deep Cyan/Blue
     hullGrad.addColorStop(0.6, '#38bdf8'); // Bright Sky Blue
@@ -283,22 +266,30 @@ class PlayerShip
     ctx.lineTo(0, this.height - 10);
     ctx.closePath();
     ctx.fill();
+
+    // Hull Outline/Border Accent
     ctx.strokeStyle = '#0284c7';
     ctx.lineWidth = 1.5;
     ctx.stroke();
+
+    // 3. WINGS & SIDE BOOSTER FINS
     ctx.fillStyle = '#0369a1';
+    // Top Wing
     ctx.beginPath();
     ctx.moveTo(8, 6);
     ctx.lineTo(24, -4);
     ctx.lineTo(30, 6);
     ctx.closePath();
     ctx.fill();
+    // Bottom Wing
     ctx.beginPath();
     ctx.moveTo(8, this.height - 6);
     ctx.lineTo(24, this.height + 4);
     ctx.lineTo(30, this.height - 6);
     ctx.closePath();
     ctx.fill();
+
+    // 4. EMERGENCY FIREFIGHTER STRIPES (Yellow Hazard Accents)
     ctx.fillStyle = '#f59e0b';
     ctx.beginPath();
     ctx.moveTo(16, 8);
@@ -307,6 +298,8 @@ class PlayerShip
     ctx.lineTo(10, this.height - 8);
     ctx.closePath();
     ctx.fill();
+
+    // 5. GLOWING COCKPIT VISOR
     const visorGrad = ctx.createLinearGradient(this.width - 24, 0, this.width - 10, 0);
     visorGrad.addColorStop(0, '#38bdf8');
     visorGrad.addColorStop(0.5, '#e0f2fe');
@@ -317,18 +310,18 @@ class PlayerShip
     ctx.ellipse(this.width - 18, this.height / 2, 10, 5, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    
+    // Visor Glass Glow Ring
     ctx.strokeStyle = '#00f0ff';
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    
+    // 6. WATER CANNON MUZZLE NOZZLE (Front-mounted Hose)
     ctx.fillStyle = '#64748b';
     ctx.fillRect(this.width - 4, this.height / 2 - 2, 6, 4);
     ctx.fillStyle = '#38bdf8';
     ctx.fillRect(this.width + 1, this.height / 2 - 1, 3, 2);
 
-    
+    // 7. FORCEFIELD SHIELD EFFECT (If Shield Powerup Active)
     if (this.hasShield) {
       ctx.strokeStyle = 'rgba(56, 189, 248, 0.85)';
       ctx.shadowBlur = 12;
@@ -345,20 +338,16 @@ class PlayerShip
 }
 const player = new PlayerShip();
 
-
-class WaterShot
- {
-  constructor(x, y, vy) 
-  {
+// --- PROJECTILES, ENEMIES, PARTICLES ---
+class WaterShot {
+  constructor(x, y, vy) {
     this.x = x; this.y = y; this.vx = 12; this.vy = vy; this.radius = 4; this.isExpired = false;
   }
   update() {
-    this.x
-     += this.vx; this.y += this.vy;
+    this.x += this.vx; this.y += this.vy;
     if (this.x > canvas.width) this.isExpired = true;
   }
-  draw() 
-  {
+  draw() {
     ctx.fillStyle = '#0284c7';
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
@@ -366,19 +355,15 @@ class WaterShot
   }
 }
 
-class Fireball 
-{
-  constructor(x, y, vx, vy)
-   {
+class Fireball {
+  constructor(x, y, vx, vy) {
     this.x = x; this.y = y; this.vx = vx; this.vy = vy; this.radius = 5; this.isExpired = false;
   }
-  update()
-   {
+  update() {
     this.x += this.vx; this.y += this.vy;
     if (this.x < -10) this.isExpired = true;
   }
-  draw() 
-  {
+  draw() {
     ctx.fillStyle = '#ea580c';
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
@@ -417,8 +402,7 @@ class EnemyAutomata {
     }
 
     this.x -= this.speed;
-    if (this.type === 'interceptor') 
-      {
+    if (this.type === 'interceptor') {
       this.y = this.startY + Math.sin(this.x * 0.02) * (this.sineAmp * 15);
     }
 
@@ -428,13 +412,16 @@ class EnemyAutomata {
     }
     if (this.x < -this.width) this.isExpired = true;
   }
-  draw()
-   {
+  draw() {
     ctx.save();
     ctx.translate(this.x, this.y);
 
     if (this.type === 'boss') {
-
+      // ----------------------------------------------------
+      // 1. DREADNOUGHT BOSS AUTOMATA (Massive Mechanical Warship)
+      // ----------------------------------------------------
+      
+      // Main Hull Gradient (Dark Crimson to Fiery Red)
       const bossGrad = ctx.createLinearGradient(0, 0, this.width, 0);
       bossGrad.addColorStop(0, '#7f1d1d');
       bossGrad.addColorStop(0.5, '#dc2626');
@@ -442,7 +429,7 @@ class EnemyAutomata {
 
       ctx.fillStyle = bossGrad;
       ctx.beginPath();
-      ctx.moveTo(this.width, this.height / 2);
+      ctx.moveTo(this.width, this.height / 2); // Nose
       ctx.lineTo(this.width - 25, 10);
       ctx.lineTo(30, 0);
       ctx.lineTo(0, 20);
@@ -453,10 +440,12 @@ class EnemyAutomata {
       ctx.closePath();
       ctx.fill();
 
+      // Armor Outline
       ctx.strokeStyle = '#f87171';
       ctx.lineWidth = 2;
       ctx.stroke();
 
+      // Glowing Core Reactor Eyeball
       ctx.fillStyle = '#fef08a';
       ctx.beginPath();
       ctx.arc(this.width - 35, this.height / 2, 14, 0, Math.PI * 2);
@@ -467,10 +456,12 @@ class EnemyAutomata {
       ctx.arc(this.width - 35, this.height / 2, 7, 0, Math.PI * 2);
       ctx.fill();
 
+      // Flame Cannons (Top & Bottom)
       ctx.fillStyle = '#450a0a';
       ctx.fillRect(this.width - 15, 20, 18, 8);
       ctx.fillRect(this.width - 15, this.height - 28, 18, 8);
 
+      // Boss Health Bar Header Overlay
       ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
       ctx.fillRect(0, -18, this.width, 8);
       ctx.fillStyle = '#ef4444';
@@ -480,10 +471,15 @@ class EnemyAutomata {
       ctx.strokeRect(0, -18, this.width, 8);
 
     } else if (this.type === 'heavy') {
-
+      // ----------------------------------------------------
+      // 2. HEAVY CRUISER (Armored Quad-Wing Mech)
+      // ----------------------------------------------------
+      
+      // Rear Thruster Flame
       ctx.fillStyle = '#f97316';
       ctx.fillRect(this.width, this.height / 2 - 6, 10 + Math.random() * 6, 12);
 
+      // Body Hull
       ctx.fillStyle = '#9a3412';
       ctx.beginPath();
       ctx.moveTo(0, this.height / 2);
@@ -494,18 +490,22 @@ class EnemyAutomata {
       ctx.lineTo(20, this.height - 4);
       ctx.closePath();
       ctx.fill();
-      
+
+      // Armor Plates
       ctx.fillStyle = '#ea580c';
       ctx.fillRect(10, 14, this.width - 24, this.height - 28);
 
+      // Dual Visor Eyes
       ctx.fillStyle = '#fde047';
       ctx.fillRect(10, 10, 10, 5);
       ctx.fillRect(10, this.height - 15, 10, 5);
 
-    } 
-    else if (this.type === 'interceptor') 
-      {
+    } else if (this.type === 'interceptor') {
+      // ----------------------------------------------------
+      // 3. INTERCEPTOR (Agile Swept-Wing Fighter)
+      // ----------------------------------------------------
       
+      // Engine Flame
       ctx.fillStyle = '#ef4444';
       ctx.beginPath();
       ctx.moveTo(this.width, this.height / 2);
@@ -514,10 +514,10 @@ class EnemyAutomata {
       ctx.closePath();
       ctx.fill();
 
-      
+      // Sharp Needle Body
       ctx.fillStyle = '#c2410c';
       ctx.beginPath();
-      ctx.moveTo(0, this.height / 2);
+      ctx.moveTo(0, this.height / 2); // Sharp Nose Pointing Left
       ctx.lineTo(this.width - 8, 2);
       ctx.lineTo(this.width, 8);
       ctx.lineTo(this.width - 12, this.height / 2);
@@ -526,15 +526,16 @@ class EnemyAutomata {
       ctx.closePath();
       ctx.fill();
 
-      
+      // Cockpit Light
       ctx.fillStyle = '#fef08a';
       ctx.fillRect(8, this.height / 2 - 3, 12, 6);
 
-    } 
-    else 
-      {
-    
-     
+    } else {
+      // ----------------------------------------------------
+      // 4. SCOUT BOT (Fast Light Strike Drone)
+      // ----------------------------------------------------
+      
+      // Body
       ctx.fillStyle = '#f97316';
       ctx.beginPath();
       ctx.moveTo(0, this.height / 2);
@@ -553,23 +554,19 @@ class EnemyAutomata {
   }
 }
 
-class PowerupCrate 
-{
-  constructor(x, y)
-   {
+class PowerupCrate {
+  constructor(x, y) {
     this.x = x; this.y = y; this.size = 20; this.speed = 1.8; this.isExpired = false;
     const roll = Math.random();
     if (roll < 0.4) this.type = 'health';
     else if (roll < 0.7) this.type = 'weapon';
     else this.type = 'shield';
   }
-  update() 
-  {
+  update() {
     this.x -= this.speed;
     if (this.x < -this.size) this.isExpired = true;
   }
-  draw() 
-  {
+  draw() {
     if (this.type === 'health') ctx.fillStyle = '#10b981';
     else if (this.type === 'weapon') ctx.fillStyle = '#f59e0b';
     else ctx.fillStyle = '#0284c7';
@@ -585,10 +582,8 @@ class PowerupCrate
   }
 }
 
-class VisualParticle
- {
-  constructor(x, y, color) 
-  {
+class VisualParticle {
+  constructor(x, y, color) {
     this.x = x; this.y = y;
     this.vx = (Math.random() - 0.5) * 8;
     this.vy = (Math.random() - 0.5) * 8;
@@ -598,14 +593,12 @@ class VisualParticle
     this.size = Math.random() * 4 + 2;
     this.isExpired = false;
   }
-  update() 
-  {
+  update() {
     this.x += this.vx; this.y += this.vy;
     this.alpha -= this.fade;
     if (this.alpha <= 0) this.isExpired = true;
   }
-  draw() 
-  {
+  draw() {
     ctx.globalAlpha = Math.max(0, this.alpha);
     ctx.fillStyle = this.color;
     ctx.fillRect(this.x, this.y, this.size, this.size);
@@ -629,8 +622,7 @@ let defeatedCount = 0;
 let requiredKills = 0;
 let isBossPresent = false;
 
-for (let i = 0; i < 90; i++)
-   {
+for (let i = 0; i < 90; i++) {
   backgroundDots.push({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
@@ -639,8 +631,7 @@ for (let i = 0; i < 90; i++)
   });
 }
 
-function launchMission(sector)
- {
+function launchMission(sector) {
   totalScore = 0;
   comboMultiplier = 1;
   comboTimer = 0;
@@ -650,8 +641,7 @@ function launchMission(sector)
   requestAnimationFrame(gameLoop);
 }
 
-function setupSector(sectorNum)
- {
+function setupSector(sectorNum) {
   currentSector = sectorNum;
   defeatedCount = 0;
   isBossPresent = false;
@@ -663,16 +653,13 @@ function setupSector(sectorNum)
   powerups = [];
 }
 
-function handleSpawns() 
-{
-  if (currentSector % 5 === 0 && !isBossPresent && defeatedCount >= 5) 
-    {
+function handleSpawns() {
+  if (currentSector % 5 === 0 && !isBossPresent && defeatedCount >= 5) {
     enemies.push(new EnemyAutomata('boss', currentSector));
     isBossPresent = true;
   }
 
-  if (Math.random() < 0.024 && !isBossPresent)
-     {
+  if (Math.random() < 0.024 && !isBossPresent) {
     const roll = Math.random();
     if (roll < 0.5) enemies.push(new EnemyAutomata('scout', currentSector));
     else if (roll < 0.8) enemies.push(new EnemyAutomata('interceptor', currentSector));
@@ -680,19 +667,18 @@ function handleSpawns()
   }
 }
 
-function updateFrame() 
-{
+function updateFrame() {
   if (!isLoopRunning) return;
 
   player.update();
 
+  // Combo Timer Decay
   if (comboTimer > 0) {
     comboTimer--;
     if (comboTimer <= 0) comboMultiplier = 1;
   }
 
-  backgroundDots.forEach(dot =>
-     {
+  backgroundDots.forEach(dot => {
     dot.x -= dot.speed;
     if (dot.x < 0) dot.x = canvas.width;
   });
@@ -700,19 +686,14 @@ function updateFrame()
   waterShots.forEach(shot => shot.update());
   waterShots = waterShots.filter(shot => !shot.isExpired);
 
-  fireballs.forEach(fb =>
-     {
+  fireballs.forEach(fb => {
     fb.update();
     const hitDist = Math.hypot(player.x + player.width / 2 - fb.x, player.y + player.height / 2 - fb.y);
 
-    if (hitDist < fb.radius + player.height / 2)
-       {
-      if (player.hasShield) 
-        {
+    if (hitDist < fb.radius + player.height / 2) {
+      if (player.hasShield) {
         player.hasShield = false;
-      } 
-      else 
-        {
+      } else {
         player.hp -= 12;
         addScreenShake(6);
       }
@@ -724,8 +705,7 @@ function updateFrame()
   });
   fireballs = fireballs.filter(fb => !fb.isExpired);
 
-  enemies.forEach(enemy => 
-    {
+  enemies.forEach(enemy => {
     enemy.update();
 
     if (
@@ -733,8 +713,7 @@ function updateFrame()
       player.x + player.width > enemy.x &&
       player.y < enemy.y + enemy.height &&
       player.y + player.height > enemy.y
-    ) 
-    {
+    ) {
       player.hp -= 25;
       addScreenShake(12);
       spawnExplosion(enemy.x, enemy.y, '#ea580c', 20);
@@ -744,8 +723,7 @@ function updateFrame()
       if (player.hp <= 0) triggerMissionEnd(false);
     }
 
-    waterShots.forEach(shot => 
-      {
+    waterShots.forEach(shot => {
       if (
         shot.x > enemy.x && shot.x < enemy.x + enemy.width &&
         shot.y > enemy.y && shot.y < enemy.y + enemy.height
@@ -773,18 +751,14 @@ function updateFrame()
 
           if (enemy.type === 'boss') addScreenShake(18);
 
-          if (Math.random() < 0.25 && enemy.type !== 'boss') 
-            {
+          if (Math.random() < 0.25 && enemy.type !== 'boss') {
             powerups.push(new PowerupCrate(enemy.x, enemy.y));
           }
 
-          if (defeatedCount >= requiredKills || enemy.type === 'boss')
-             {
+          if (defeatedCount >= requiredKills || enemy.type === 'boss') {
             if (currentSector < MAX_SECTORS) {
               setupSector(currentSector + 1);
-            } 
-            else
-               {
+            } else {
               triggerMissionEnd(true);
             }
           }
@@ -794,13 +768,11 @@ function updateFrame()
   });
   enemies = enemies.filter(e => !e.isExpired);
 
-  powerups.forEach(p =>
-     {
+  powerups.forEach(p => {
     p.update();
     const grabDist = Math.hypot(player.x + player.width / 2 - p.x, player.y + player.height / 2 - p.y);
 
-    if (grabDist < p.size + player.height / 2) 
-      {
+    if (grabDist < p.size + player.height / 2) {
       sfx.playItemPickup();
       if (p.type === 'health') player.hp = Math.min(player.maxHp, player.hp + 30);
       if (p.type === 'weapon') player.weaponTier = Math.min(3, player.weaponTier + 1);
@@ -816,8 +788,7 @@ function updateFrame()
   handleSpawns();
 }
 
-function renderFrame()
- {
+function renderFrame() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Screen Shake Translation
@@ -829,9 +800,11 @@ function renderFrame()
     screenShakeTimer--;
   }
 
+  // Background dots
   ctx.fillStyle = '#cbd5e1';
   backgroundDots.forEach(dot => ctx.fillRect(dot.x, dot.y, dot.size, dot.size));
 
+  // Entities
   player.draw();
   waterShots.forEach(s => s.draw());
   enemies.forEach(e => e.draw());
@@ -839,13 +812,15 @@ function renderFrame()
   powerups.forEach(p => p.draw());
   particles.forEach(pt => pt.draw());
 
-  ctx.restore();
+  ctx.restore(); // Restore shake transform
 
+  // --- HUD RENDERING ---
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(15, 15, 220, 48);
   ctx.strokeStyle = '#e2e8f0';
   ctx.strokeRect(15, 15, 220, 48);
 
+  // Health Bar
   ctx.fillStyle = '#e2e8f0';
   ctx.fillRect(20, 20, 210, 14);
   ctx.fillStyle = player.hp > 30 ? '#10b981' : '#ef4444';
@@ -855,11 +830,13 @@ function renderFrame()
   ctx.font = 'bold 10px sans-serif';
   ctx.fillText(`HULL: ${Math.ceil(player.hp)}%`, 25, 31);
 
+  // Heat Bar
   ctx.fillStyle = '#e2e8f0';
   ctx.fillRect(20, 42, 210, 8);
   ctx.fillStyle = player.isOverheated ? '#ef4444' : '#f59e0b';
   ctx.fillRect(20, 42, (player.cannonTemp / player.maxTemp) * 210, 8);
 
+  // Sector, Scores & Combo Readout
   ctx.fillStyle = '#1e293b';
   ctx.font = 'bold 15px sans-serif';
   ctx.textAlign = 'right';
@@ -890,15 +867,12 @@ function triggerMissionEnd(didWin)
  {
   isLoopRunning = false;
 
-  if (didWin) 
-    {
+  if (didWin) {
     debriefTitle.innerText = 'SECTORS CLEARED!';
     debriefTitle.style.color = '#10b981';
     debriefSubtitle.innerText = 'MISSION ACCOMPLISHED';
     debriefDetails.innerHTML = `You secured all ${MAX_SECTORS} sectors!<br>Final Score: <strong>${totalScore}</strong><br>Best Record: <strong>${highScore}</strong>`;
-  }
-   else 
-    {
+  } else {
     debriefTitle.innerText = 'CRITICAL FAILURE';
     debriefTitle.style.color = '#ef4444';
     debriefSubtitle.innerText = 'SHIP DESTROYED';
