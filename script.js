@@ -1,32 +1,17 @@
-/* ==========================================================================
-   ASTRO FIREFIGHTER - LIGHT ENGINE EDITION
-   - Clean object-oriented canvas game loop
-   - Native WebAudio synthesizer (zero external sound files)
-   - Multi-screen UI navigation flow
-   ========================================================================== */
-
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
-// Screen Overlays
 const screenWelcome = document.getElementById('screen-welcome');
 const screenControls = document.getElementById('screen-controls');
 const screenLevels = document.getElementById('screen-levels');
 const screenDebrief = document.getElementById('screen-debrief');
-
-// Interactive Buttons
 const btnNextControls = document.getElementById('btn-next-controls');
 const btnNextLevels = document.getElementById('btn-next-levels');
 const btnLaunchGame = document.getElementById('btn-launch-game');
 const btnReturnMenu = document.getElementById('btn-return-menu');
 const sectorGrid = document.getElementById('sector-grid');
-
-// Debrief Elements
 const debriefTitle = document.getElementById('debrief-title');
 const debriefSubtitle = document.getElementById('debrief-subtitle');
 const debriefDetails = document.getElementById('debrief-details');
-
-// --- AUDIO SYNTHESIZER ---
 class AudioSynthesizer {
   constructor() {
     this.audioCtx = null;
@@ -55,7 +40,6 @@ class AudioSynthesizer {
     osc.start();
     osc.stop(this.audioCtx.currentTime + 0.09);
   }
-
   playExplosion() {
     if (!this.audioCtx) return;
     const duration = 0.22;
@@ -83,7 +67,6 @@ class AudioSynthesizer {
     gain.connect(this.audioCtx.destination);
     noise.start();
   }
-
   playItemPickup() {
     if (!this.audioCtx) return;
     const osc = this.audioCtx.createOscillator();
@@ -102,13 +85,9 @@ class AudioSynthesizer {
     osc.stop(this.audioCtx.currentTime + 0.18);
   }
 }
-
 const sfx = new AudioSynthesizer();
-
-// --- NAVIGATION & MENU FLOW ---
 const MAX_SECTORS = 15;
 let chosenStartSector = 1;
-
 function renderSectorGrid() {
   sectorGrid.innerHTML = '';
   for (let s = 1; s <= MAX_SECTORS; s++) {
@@ -121,11 +100,9 @@ function renderSectorGrid() {
       btn.classList.add('active');
       chosenStartSector = s;
     });
-
     sectorGrid.appendChild(btn);
   }
 }
-
 renderSectorGrid();
 
 btnNextControls.addEventListener('click', () => {
@@ -149,7 +126,6 @@ btnReturnMenu.addEventListener('click', () => {
   screenWelcome.classList.remove('hidden');
 });
 
-// --- GAME LOGIC & INPUTS ---
 let currentSector = 1;
 let totalScore = 0;
 let isLoopRunning = false;
@@ -166,7 +142,6 @@ window.addEventListener('keyup', (e) => {
   activeKeys[e.code] = false;
 });
 
-// --- PLAYER ---
 class PlayerShip {
   constructor() {
     this.reset();
@@ -181,17 +156,14 @@ class PlayerShip {
     this.hp = 100;
     this.maxHp = 100;
 
-    // Heat mechanics
     this.cannonTemp = 0;
     this.maxTemp = 100;
     this.isOverheated = false;
 
-    // Hydro-Dash
     this.dashCooldown = 0;
     this.isDashing = false;
     this.dashTimer = 0;
 
-    // Upgrades
     this.weaponTier = 1;
     this.hasShield = false;
     this.lastShotTime = 0;
@@ -200,7 +172,6 @@ class PlayerShip {
   update() {
     let currentSpeed = this.speed;
 
-    // Dash Handling
     if (this.dashCooldown > 0) this.dashCooldown--;
 
     if (this.isDashing) {
@@ -211,18 +182,15 @@ class PlayerShip {
       if (this.dashCooldown <= 0) {
         this.isDashing = true;
         this.dashTimer = 10;
-        this.dashCooldown = 80; // ~1.3 seconds recovery
+        this.dashCooldown = 80;
         spawnExplosion(this.x, this.y + this.height / 2, '#38bdf8', 10);
       }
     }
-
-    // Directional Movement
     if ((activeKeys['KeyW'] || activeKeys['ArrowUp']) && this.y > 10) this.y -= currentSpeed;
     if ((activeKeys['KeyS'] || activeKeys['ArrowDown']) && this.y < canvas.height - this.height - 10) this.y += currentSpeed;
     if ((activeKeys['KeyA'] || activeKeys['ArrowLeft']) && this.x > 10) this.x -= currentSpeed;
     if ((activeKeys['KeyD'] || activeKeys['ArrowRight']) && this.x < canvas.width / 1.8) this.x += currentSpeed;
 
-    // Temperature Management
     if (this.isOverheated) {
       this.cannonTemp -= 0.65;
       if (this.cannonTemp <= 0) {
@@ -233,7 +201,6 @@ class PlayerShip {
       this.cannonTemp -= 0.35;
     }
 
-    // Firing Controls
     if (activeKeys['Space'] && !this.isOverheated) {
       this.shoot();
     }
@@ -270,7 +237,6 @@ class PlayerShip {
     ctx.save();
     ctx.translate(this.x, this.y);
 
-    // 1. Thruster Engine Trail
     const flameLength = this.isDashing ? 28 : 16;
     const flameFlicker = Math.random() * 6;
     
@@ -288,7 +254,6 @@ class PlayerShip {
     ctx.closePath();
     ctx.fill();
 
-    // 2. Main Ship Hull
     const hullGrad = ctx.createLinearGradient(0, 0, this.width, 0);
     hullGrad.addColorStop(0, '#0284c7');
     hullGrad.addColorStop(0.6, '#38bdf8');
@@ -310,7 +275,6 @@ class PlayerShip {
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // 3. Wings
     ctx.fillStyle = '#0369a1';
     ctx.beginPath();
     ctx.moveTo(8, 6);
@@ -326,7 +290,6 @@ class PlayerShip {
     ctx.closePath();
     ctx.fill();
 
-    // 4. Firefighter Safety Stripe
     ctx.fillStyle = '#f59e0b';
     ctx.beginPath();
     ctx.moveTo(16, 8);
@@ -336,7 +299,6 @@ class PlayerShip {
     ctx.closePath();
     ctx.fill();
 
-    // 5. Visor
     const visorGrad = ctx.createLinearGradient(this.width - 24, 0, this.width - 10, 0);
     visorGrad.addColorStop(0, '#38bdf8');
     visorGrad.addColorStop(0.5, '#e0f2fe');
@@ -351,13 +313,11 @@ class PlayerShip {
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // 6. Water Cannon Nozzle
     ctx.fillStyle = '#64748b';
     ctx.fillRect(this.width - 4, this.height / 2 - 2, 6, 4);
     ctx.fillStyle = '#38bdf8';
     ctx.fillRect(this.width + 1, this.height / 2 - 1, 3, 2);
 
-    // 7. Energy Shield Effect
     if (this.hasShield) {
       ctx.strokeStyle = 'rgba(56, 189, 248, 0.85)';
       ctx.shadowBlur = 12;
@@ -375,7 +335,6 @@ class PlayerShip {
 
 const player = new PlayerShip();
 
-// --- PROJECTILES & ENEMIES ---
 class WaterShot {
   constructor(x, y, vy) {
     this.x = x;
@@ -543,7 +502,7 @@ class EnemyAutomata {
       ctx.fillStyle = '#f97316';
       ctx.fillRect(this.width, this.height / 2 - 6, 10 + Math.random() * 6, 12);
 
-      ctx.fillStyle = '#9a3412';
+      ctx.fillStyle = '#cc4e24';
       ctx.beginPath();
       ctx.moveTo(0, this.height / 2);
       ctx.lineTo(20, 4);
@@ -557,7 +516,7 @@ class EnemyAutomata {
       ctx.fillStyle = '#ea580c';
       ctx.fillRect(10, 14, this.width - 24, this.height - 28);
 
-      ctx.fillStyle = '#fde047';
+      ctx.fillStyle = '#dbc140';
       ctx.fillRect(10, 10, 10, 5);
       ctx.fillRect(10, this.height - 15, 10, 5);
 
@@ -622,9 +581,9 @@ class PowerupCrate {
   }
 
   draw() {
-    if (this.type === 'health') ctx.fillStyle = '#10b981';
-    else if (this.type === 'weapon') ctx.fillStyle = '#f59e0b';
-    else ctx.fillStyle = '#0284c7';
+    if (this.type === 'health') ctx.fillStyle = '#43b891';
+    else if (this.type === 'weapon') ctx.fillStyle = '#c08828';
+    else ctx.fillStyle = '#1987be';
 
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size / 2, 0, Math.PI * 2);
@@ -669,7 +628,6 @@ function spawnExplosion(x, y, color = '#ea580c', count = 15) {
   for (let i = 0; i < count; i++) particles.push(new VisualParticle(x, y, color));
 }
 
-// Global Collections
 let waterShots = [];
 let enemies = [];
 let fireballs = [];
@@ -681,7 +639,6 @@ let defeatedCount = 0;
 let requiredKills = 0;
 let isBossPresent = false;
 
-// Background Dots
 for (let i = 0; i < 90; i++) {
   backgroundDots.push({
     x: Math.random() * canvas.width,
