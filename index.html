@@ -3,23 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Astro Firefighter</title>
-<link rel="stylesheet" href="style.css">
+  <title>Astro Firefighter: Light Engine</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <div id="game-app">
     <canvas id="gameCanvas" width="1024" height="600"></canvas>
 
+    <!-- SCREEN 1: Welcome / Main Title -->
     <section id="screen-welcome" class="overlay-panel">
       <h1 class="title-primary">ASTRO FIREFIGHTER</h1>
-      <h3 class="title-secondary">EDITION v2.0</h3>
+      <h3 class="title-secondary">LIGHT ENGINE EDITION</h3>
       <p class="description">
-        Rogue thermal automata are scorching frontier space stations. Pilot the emergency response ship, build high combo streaks, and extinguish the flames!
+        Rogue thermal automata are scorching frontier space stations. Pilot the emergency response ship and extinguish the flames!
       </p>
       <button id="btn-next-controls" class="action-btn">CONTINUE</button>
     </section>
 
+    <!-- SCREEN 2: Controls & Briefing -->
     <section id="screen-controls" class="overlay-panel hidden">
       <h2>MISSION BRIEFING & CONTROLS</h2>
       
@@ -30,7 +32,7 @@
         </div>
         <div class="row-control">
           <span class="key-binding">SPACEBAR</span>
-          <span class="key-desc">Water Hose Cannon <em>(Watch Temperature!)</em></span>
+          <span class="key-desc">Water Hose Cannon <em>(Watch Cannon Temperature!)</em></span>
         </div>
         <div class="row-control">
           <span class="key-binding">SHIFT KEY</span>
@@ -39,11 +41,12 @@
       </div>
 
       <p class="tip-text">
-        Pro Tip: Rapidly defeat enemies to build your <strong>Combo Multiplier</strong> for higher scores!
+        Pick up Repair Packs <strong>(H)</strong>, Weapon Upgrades <strong>(W)</strong>, and Energy Shields <strong>(S)</strong> dropped by enemies.
       </p>
       <button id="btn-next-levels" class="action-btn">PROCEED TO SECTOR SELECT</button>
     </section>
 
+    <!-- SCREEN 3: Sector Selection -->
     <section id="screen-levels" class="overlay-panel hidden">
       <h2>SELECT STARTING SECTOR</h2>
       <p class="description">Choose a sector to deploy into, or start from Sector 1:</p>
@@ -53,6 +56,7 @@
       <button id="btn-launch-game" class="action-btn launch-btn">LAUNCH MISSION</button>
     </section>
 
+    <!-- SCREEN 4: Mission Debrief (Game Over / Win) -->
     <section id="screen-debrief" class="overlay-panel hidden">
       <h1 id="debrief-title">MISSION OVER</h1>
       <h3 id="debrief-subtitle">STATUS REPORT</h3>
@@ -60,6 +64,7 @@
       <button id="btn-return-menu" class="action-btn">RETURN TO MAIN MENU</button>
     </section>
   </div>
-<script src="script.js"></script>
+
+  <script src="script.js"></script>
 </body>
 </html>
